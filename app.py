@@ -1,20 +1,24 @@
 from flask import Flask, render_template, request, redirect, session
-import sqlite3
+import psycopg2
+import os
 import pandas as pd
 
 app = Flask(__name__)
 app.secret_key = "secret123"
 
+# DB BAĞLANTI
 def get_db():
-    con = sqlite3.connect("kitap.db")
-    con.row_factory = sqlite3.Row
-    return con
+    DATABASE_URL = os.environ.get("DATABASE_URL")
+    return psycopg2.connect(DATABASE_URL)
 
-# DB
-with get_db() as con:
-    con.execute("""
+# TABLO OLUŞTUR
+def init_db():
+    con = get_db()
+    cur = con.cursor()
+
+    cur.execute("""
     CREATE TABLE IF NOT EXISTS kitaplar(
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        id SERIAL PRIMARY KEY,
         barkod TEXT UNIQUE,
         ad TEXT,
         yazar TEXT,
@@ -22,6 +26,12 @@ with get_db() as con:
         stok INTEGER
     )
     """)
+
+    con.commit()
+    cur.close()
+    con.close()
+
+init_db()
 
 # ANA
 @app.route("/")
@@ -32,17 +42,28 @@ def home():
 @app.route("/stok")
 def stok():
     q = request.args.get("q", "")
+
     con = get_db()
-    kitaplar = con.execute("""
-    SELECT * FROM kitaplar 
-    WHERE ad LIKE ? OR yazar LIKE ? OR barkod LIKE ?
-    """, ('%'+q+'%','%'+q+'%','%'+q+'%')).fetchall()
+    cur = con.cursor()
+
+    cur.execute("""
+    SELECT barkod, ad, yazar, fiyat, stok 
+    FROM kitaplar 
+    WHERE ad ILIKE %s OR yazar ILIKE %s OR barkod ILIKE %s
+    """, (f"%{q}%", f"%{q}%", f"%{q}%"))
+
+    kitaplar = cur.fetchall()
+
+    cur.close()
+    con.close()
+
     return render_template("stok.html", kitaplar=kitaplar)
 
 # EKLE
 @app.route("/ekle", methods=["GET","POST"])
 def ekle():
     mesaj = ""
+
     if request.method == "POST":
         barkod = request.form["barkod"]
         ad = request.form["ad"]
@@ -51,30 +72,39 @@ def ekle():
         stok = int(request.form["stok"])
 
         con = get_db()
-        var = con.execute("SELECT * FROM kitaplar WHERE barkod=?", (barkod,)).fetchone()
+        cur = con.cursor()
+
+        cur.execute("SELECT * FROM kitaplar WHERE barkod=%s", (barkod,))
+        var = cur.fetchone()
 
         if var:
-            con.execute("UPDATE kitaplar SET stok = stok + ? WHERE barkod=?", (stok, barkod))
+            cur.execute("UPDATE kitaplar SET stok = stok + %s WHERE barkod=%s",
+                        (stok, barkod))
             mesaj = "Stok artırıldı"
         else:
-            con.execute("INSERT INTO kitaplar VALUES (NULL,?,?,?,?,?)",
-                        (barkod, ad, yazar, fiyat, stok))
-
+            cur.execute("""
+            INSERT INTO kitaplar (barkod, ad, yazar, fiyat, stok)
+            VALUES (%s,%s,%s,%s,%s)
+            """, (barkod, ad, yazar, fiyat, stok))
             mesaj = "Ürün eklendi"
 
         con.commit()
+        cur.close()
+        con.close()
 
     return render_template("ekle.html", mesaj=mesaj)
 
-# EXCEL
+# EXCEL YÜKLE
 @app.route("/excel", methods=["GET","POST"])
 def excel():
     mesaj = ""
+
     if request.method == "POST":
         file = request.files["file"]
         df = pd.read_excel(file)
 
         con = get_db()
+        cur = con.cursor()
 
         for _, row in df.iterrows():
             barkod = str(row[0])
@@ -83,15 +113,22 @@ def excel():
             fiyat = float(row[3])
             stok = int(row[4])
 
-            var = con.execute("SELECT * FROM kitaplar WHERE barkod=?", (barkod,)).fetchone()
+            cur.execute("SELECT * FROM kitaplar WHERE barkod=%s", (barkod,))
+            var = cur.fetchone()
 
             if var:
-                con.execute("UPDATE kitaplar SET stok = stok + ? WHERE barkod=?", (stok, barkod))
+                cur.execute("UPDATE kitaplar SET stok = stok + %s WHERE barkod=%s",
+                            (stok, barkod))
             else:
-                con.execute("INSERT INTO kitaplar VALUES (NULL,?,?,?,?,?)",
-                            (barkod, ad, yazar, fiyat, stok))
+                cur.execute("""
+                INSERT INTO kitaplar (barkod, ad, yazar, fiyat, stok)
+                VALUES (%s,%s,%s,%s,%s)
+                """, (barkod, ad, yazar, fiyat, stok))
 
         con.commit()
+        cur.close()
+        con.close()
+
         mesaj = "Excel yüklendi"
 
     return render_template("excel.html", mesaj=mesaj)
@@ -105,17 +142,24 @@ def satis():
         barkod = request.form["barkod"]
 
         con = get_db()
-        kitap = con.execute("SELECT * FROM kitaplar WHERE barkod=?", (barkod,)).fetchone()
+        cur = con.cursor()
+
+        cur.execute("SELECT ad, fiyat, stok FROM kitaplar WHERE barkod=%s", (barkod,))
+        kitap = cur.fetchone()
+
+        cur.close()
+        con.close()
 
         if not kitap:
             mesaj = "Ürün yok"
-        elif kitap["stok"] <= 0:
+        elif kitap[2] <= 0:
             mesaj = "Stok yok"
         else:
             if "sepet" not in session:
                 session["sepet"] = []
 
             bulundu = False
+
             for i in session["sepet"]:
                 if i["barkod"] == barkod:
                     i["adet"] += 1
@@ -124,8 +168,8 @@ def satis():
             if not bulundu:
                 session["sepet"].append({
                     "barkod": barkod,
-                    "ad": kitap["ad"],
-                    "fiyat": kitap["fiyat"],
+                    "ad": kitap[0],
+                    "fiyat": kitap[1],
                     "adet": 1
                 })
 
@@ -171,10 +215,12 @@ def sil(barkod):
 @app.route("/tamamla")
 def tamamla():
     con = get_db()
+    cur = con.cursor()
+
     sepet = session.get("sepet", [])
 
     for i in sepet:
-        con.execute("UPDATE kitaplar SET stok = stok - ? WHERE barkod=?",
+        cur.execute("UPDATE kitaplar SET stok = stok - %s WHERE barkod=%s",
                     (i["adet"], i["barkod"]))
 
     con.commit()
@@ -185,6 +231,9 @@ def tamamla():
     session["toplam"] = toplam
     session["sepet"] = []
 
+    cur.close()
+    con.close()
+
     return redirect("/fis")
 
 # FİŞ
@@ -194,5 +243,5 @@ def fis():
     toplam = session.get("toplam", 0)
     return render_template("fis.html", satis=satis, toplam=toplam)
 
-if __name__ == "__main__":
+if _name_ == "__main__":
     app.run()

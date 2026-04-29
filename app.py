@@ -128,7 +128,7 @@ def excel_yukle():
     try:
         file = request.files["file"]
 
-        df = pd.read_csv(file)
+        df = pd.read_csv(file,encoding="utf-8")
 
         con = get_db()
         cur = con.cursor()

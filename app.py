@@ -36,7 +36,7 @@ init_db()
 # ANA
 @app.route("/")
 def home():
-    return redirect("/stok")
+    return render_template("index.html")
 
 # STOK + ARAMA
 @app.route("/stok")

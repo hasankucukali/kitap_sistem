@@ -1,3 +1,12 @@
+<<!DOCTYPE html>
+<html>
+<head>
+    <title>Stok</title>
+</head>
+<body>
+
+<h2>Stok Listesi</h2>
+
 <table border="1">
 <tr>
 <th>Barkod</th>
@@ -9,27 +18,15 @@
 
 {% for k in kitaplar %}
 <tr>
-<td>{{ k[0] }}</td>
-<td>{{ k[1] }}</td>
-<td>{{ k[2] }}</td>
-<td>{{ k[3] }}</td>
-<td>{{ k[4] }}</td>
+<td>{{k[0]}}</td>
+<td>{{k[1]}}</td>
+<td>{{k[2]}}</td>
+<td>{{k[3]}}</td>
+<td>{{k[4]}}</td>
 </tr>
 {% endfor %}
 
 </table>
-<style>
-table {
-    border-collapse: collapse;
-    width: 80%;
-    margin: auto;
-}
-th, td {
-    padding: 10px;
-    text-align: center;
-}
-th {
-    background: #333;
-    color: white;
-}
-</style>
+
+</body>
+</html>

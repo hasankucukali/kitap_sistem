@@ -126,10 +126,10 @@ def stok_azalt(barkod):
 @app.route("/excel_yukle", methods=["POST"])
 def excel_yukle():
     try:
-      file = request.files["file"]
+        file = request.files["file"]
 
-df = pd.read_csv(file, sep=";", encoding="utf-8-sig")
-df.columns = df.columns.str.strip().str.lower()
+        df = pd.read_csv(file, sep=";", encoding="utf-8-sig")
+        df.columns = df.columns.str.strip().str.lower()
 
         con = get_db()
         cur = con.cursor()

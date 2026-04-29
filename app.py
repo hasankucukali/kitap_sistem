@@ -63,6 +63,8 @@ def stok():
 @app.route("/ekle", methods=["GET","POST"])
 def ekle():
     mesaj = ""
+    if not request.form.get("barkod") or not request.form.get("ad"):
+    return render_template("ekle.html", mesaj="Eksik bilgi"
 
     if request.method == "POST":
         barkod = request.form["barkod"]

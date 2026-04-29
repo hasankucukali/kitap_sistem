@@ -41,29 +41,20 @@ def home():
 # STOK + ARAMA
 @app.route("/stok")
 def stok():
-    q = request.args.get("q")
+    try:
+        con = get_db()
+        cur = con.cursor()
 
-    con = get_db()
-    cur = con.cursor()
+        cur.execute("SELECT barkod, ad, yazar, fiyat, stok FROM kitaplar")
+        rows = cur.fetchall()
 
-    if q:
-        cur.execute("""
-        SELECT barkod, ad, yazar, fiyat, stok 
-        FROM kitaplar 
-        WHERE ad ILIKE %s OR yazar ILIKE %s OR barkod ILIKE %s
-        """, (f"%{q}%", f"%{q}%", f"%{q}%"))
-    else:
-        cur.execute("""
-        SELECT barkod, ad, yazar, fiyat, stok 
-        FROM kitaplar
-        """)
+        cur.close()
+        con.close()
 
-    kitaplar = cur.fetchall()
+        return render_template("stok.html", kitaplar=rows)
 
-    cur.close()
-    con.close()
-
-    return render_template("stok.html", kitaplar=kitaplar)
+    except Exception as e:
+        return "HATA: " + str(e)
 # EKLE
 @app.route("/ekle", methods=["GET","POST"])
 def ekle():

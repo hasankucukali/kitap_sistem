@@ -41,20 +41,16 @@ def home():
 # STOK + ARAMA
 @app.route("/stok")
 def stok():
-    try:
-        con = get_db()
-        cur = con.cursor()
+    con = get_db()
+    cur = con.cursor()
 
-        cur.execute("SELECT barkod, ad, yazar, fiyat, stok FROM kitaplar")
-        rows = cur.fetchall()
+    cur.execute("SELECT barkod, ad, yazar, fiyat, stok FROM kitaplar")
+    rows = cur.fetchall()
 
-        cur.close()
-        con.close()
+    cur.close()
+    con.close()
 
-        return render_template("stok.html", kitaplar=rows)
-
-    except Exception as e:
-        return "HATA: " + str(e)
+    return render_template("stok.html", kitaplar=rows)
 # EKLE
 @app.route("/ekle", methods=["GET","POST"])
 def ekle():

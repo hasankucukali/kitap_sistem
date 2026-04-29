@@ -231,28 +231,40 @@ def sil(barkod):
 # TAMAMLA + FİŞ
 @app.route("/tamamla")
 def tamamla():
-    con = get_db()
-    cur = con.cursor()
+    try:
+        con = get_db()
+        cur = con.cursor()
 
-    sepet = session.get("sepet", [])
+        sepet = session.get("sepet", [])
 
-    for i in sepet:
-        cur.execute("UPDATE kitaplar SET stok = stok - %s WHERE barkod=%s",
-                    (i["adet"], i["barkod"]))
+        if not sepet:
+            return redirect("/satis")
 
-    con.commit()
+        for i in sepet:
+            barkod = i["barkod"]
+            adet = int(i["adet"])
 
-    toplam = sum(i["adet"] * i["fiyat"] for i in sepet)
+            cur.execute("""
+            UPDATE kitaplar 
+            SET stok = stok - %s 
+            WHERE barkod = %s
+            """, (adet, barkod))
 
-    session["son_satis"] = sepet
-    session["toplam"] = toplam
-    session["sepet"] = []
+        con.commit()   # 💥 EN ÖNEMLİ
 
-    cur.close()
-    con.close()
+        toplam = sum(i["adet"] * i["fiyat"] for i in sepet)
 
-    return redirect("/fis")
+        session["son_satis"] = sepet
+        session["toplam"] = toplam
+        session["sepet"] = []
 
+        cur.close()
+        con.close()
+
+        return redirect("/fis")
+
+    except Exception as e:
+        return "HATA: " + str(e)
 # FİŞ
 @app.route("/fis")
 def fis():

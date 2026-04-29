@@ -258,6 +258,50 @@ def fis():
     satis = session.get("son_satis", [])
     toplam = session.get("toplam", 0)
     return render_template("fis.html", satis=satis, toplam=toplam)
+    mport pandas as pd
+
+@app.route("/excel_yukle", methods=["POST"])
+def excel_yukle():
+    try:
+        file = request.files["file"]
+
+        if not file:
+            return "Dosya seçilmedi"
+
+        df = pd.read_excel(file)
+
+        con = get_db()
+        cur = con.cursor()
+
+        for _, row in df.iterrows():
+            barkod = str(row["barkod"])
+            ad = row["ad"]
+            yazar = row["yazar"]
+            fiyat = float(row["fiyat"])
+            stok = int(row["stok"])
+
+            cur.execute("SELECT * FROM kitaplar WHERE barkod=%s", (barkod,))
+            var = cur.fetchone()
+
+            if var:
+                cur.execute(
+                    "UPDATE kitaplar SET stok = stok + %s WHERE barkod=%s",
+                    (stok, barkod)
+                )
+            else:
+                cur.execute(
+                    "INSERT INTO kitaplar (barkod, ad, yazar, fiyat, stok) VALUES (%s,%s,%s,%s,%s)",
+                    (barkod, ad, yazar, fiyat, stok)
+                )
+
+        con.commit()
+        cur.close()
+        con.close()
+
+        return redirect("/stok")
+
+    except Exception as e:
+        return "HATA: " + str(e)
 
 if __name__ == "__main__":
     app.run()

@@ -65,6 +65,14 @@
         <div class="msg">{{ mesaj }}</div>
     {% endif %}
 </div>
+    <hr>
+
+<h4>📥 Excel ile Toplu Ürün Ekle</h4>
+
+<form action="/excel_yukle" method="post" enctype="multipart/form-data">
+    <input type="file" name="file" class="form-control" required>
+    <button class="btn btn-dark mt-2">Excel Yükle</button>
+</form>
 
 <script>
 // 🔥 ENTER TUŞUNU ENGELLE (BARKOD OKUTUNCA FORM GİTMESİN)

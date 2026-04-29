@@ -143,6 +143,7 @@ def satis():
                 if i["barkod"] == barkod:
                     i["adet"] += 1
                     bulundu = True
+                    break
 
             if not bulundu:
                 session["sepet"].append({
@@ -155,6 +156,7 @@ def satis():
             mesaj = "Ürün bulunamadı"
 
     toplam = sum(i["adet"] * i["fiyat"] for i in session["sepet"])
+    session.modified = True
 
     return render_template("satis.html", sepet=session["sepet"], toplam=toplam, mesaj=mesaj)
 
@@ -165,6 +167,9 @@ def arttir(barkod):
     for i in session["sepet"]:
         if i["barkod"] == barkod:
             i["adet"] += 1
+            break
+
+    session.modified = True
     return redirect("/satis")
 
 
@@ -174,6 +179,9 @@ def azalt(barkod):
     for i in session["sepet"]:
         if i["barkod"] == barkod and i["adet"] > 1:
             i["adet"] -= 1
+        
+
+    session.modified = True
     return redirect("/satis")
 
 
@@ -181,6 +189,9 @@ def azalt(barkod):
 @app.route("/sil/<barkod>")
 def sil(barkod):
     session["sepet"] = [i for i in session["sepet"] if i["barkod"] != barkod]
+    
+
+    session.modified = True
     return redirect("/satis")
 
 

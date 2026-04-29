@@ -19,7 +19,8 @@
 <div class="container mt-4">
 
 <h3>📦 Stok Listesi</h3>
-
+<form method="get" class="mb-3">
+    <input type="text" name="q" class="form-control" placeholder="Kitap ara...">
 <table class="table table-bordered table-striped mt-3">
 <thead class="table-dark">
 <tr>
@@ -28,6 +29,8 @@
 <th>Yazar</th>
 <th>Fiyat</th>
 <th>Stok</th>
+<th>İşlem</th>
+
 </tr>
 </thead>
 
@@ -39,11 +42,15 @@
 <td>{{k[2]}}</td>
 <td>{{k[3]}}</td>
 <td>{{k[4]}}</td>
+<td>
+    <a href="/stok_arttir/{{k[0]}}" class="btn btn-success btn-sm">+</a>
+    <a href="/stok_azalt/{{k[0]}}" class="btn btn-warning btn-sm">-</a>
+    <a href="/stok_sil/{{k[0]}}" class="btn btn-danger btn-sm">Sil</a>
+</td>
 </tr>
 {% endfor %}
 </tbody>
-<form method="get" class="mb-3">
-    <input type="text" name="q" class="form-control" placeholder="Kitap ara...">
+
 </form>
 </table>
 

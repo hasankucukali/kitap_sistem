@@ -1,25 +1,19 @@
-{% extends "base.html" %}
-{% block content %}
-
-<h3>Stok</h3>
-
-<form>
-<input name="q" class="form-control" placeholder="Ara...">
-</form>
-
-<table class="table mt-3">
-<tr><th>Barkod</th><th>Ad</th><th>Yazar</th><th>Fiyat</th><th>Stok</th></tr>
+table>
+<tr>
+<th>Barkod</th>
+<th>Ad</th>
+<th>Yazar</th>
+<th>Fiyat</th>
+<th>Stok</th>
+</tr>
 
 {% for k in kitaplar %}
 <tr>
-<td>{{k.barkod}}</td>
-<td>{{k.ad}}</td>
-<td>{{k.yazar}}</td>
-<td>{{k.fiyat}}</td>
-<td>{{k.stok}}</td>
+<td>{{k[0]}}</td>
+<td>{{k[1]}}</td>
+<td>{{k[2]}}</td>
+<td>{{k[3]}}</td>
+<td>{{k[4]}}</td>
 </tr>
 {% endfor %}
-
 </table>
-
-{% endblock %}

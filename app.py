@@ -128,7 +128,7 @@ def excel_yukle():
     try:
         file = request.files["file"]
 
-        df = pd.read_excel(file, engine="openyxl")
+        df = pd.read_excel(file, engine="xlrd")
 
         con = get_db()
         cur = con.cursor()

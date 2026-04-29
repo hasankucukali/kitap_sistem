@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<h3>KASA FİŞİ</h3>
+<hr>
+
+{% for s in satis %}
+<p>{{s.ad}} x{{s.adet}} = {{s.adet * s.fiyat}} TL</p>
+{% endfor %}
+
+<hr>
+<h3>TOPLAM: {{toplam}} TL</h3>
+
+<button onclick="window.print()">Yazdır</button>
+
+</body>
+</html>

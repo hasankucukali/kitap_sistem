@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h3>Sepet</h3>
+
+<table class="table">
+<tr><th>Ad</th><th>Adet</th><th>Fiyat</th><th>Toplam</th><th></th></tr>
+{% for s in sepet %}
+<tr>
+<td>{{s.ad}}</td>
+<td>{{s.adet}}</td>
+<td>{{s.fiyat}}</td>
+<td>{{s.adet * s.fiyat}}</td>
+<td><a href="/sil/{{s.barkod}}" class="btn btn-danger btn-sm">Sil</a></td>
+</tr>
+{% endfor %}
+</table>
+
+<h4>Toplam: {{toplam}} TL</h4>
+
+<a href="/tamamla" class="btn btn-success">Satışı Tamamla</a>
+
+{% endblock %}

@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h3>Ürün Ekle</h3>
+
+<form method="post">
+<input name="barkod" class="form-control" placeholder="Barkod"><br>
+<input name="ad" class="form-control" placeholder="Ad"><br>
+<input name="yazar" class="form-control" placeholder="Yazar"><br>
+<input name="fiyat" class="form-control" placeholder="Fiyat"><br>
+<input name="stok" class="form-control" placeholder="Stok"><br>
+
+<button class="btn btn-primary">Kaydet</button>
+</form>
+
+<p>{{mesaj}}</p>
+
+{% endblock %}

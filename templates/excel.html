@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h3>Excel Yükle</h3>
+
+<form method="post" enctype="multipart/form-data">
+<input type="file" name="file" class="form-control">
+<button class="btn btn-primary mt-2">Yükle</button>
+</form>
+
+<p>{{mesaj}}</p>
+
+{% endblock %}

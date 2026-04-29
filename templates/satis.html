@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h3>Satış</h3>
+
+<form method="post">
+<input name="barkod" class="form-control" placeholder="Barkod okut" autofocus>
+<button class="btn btn-success mt-2">Ekle</button>
+</form>
+
+<p class="text-danger">{{mesaj}}</p>
+
+<hr>
+
+<table class="table">
+<tr><th>Ad</th><th>Adet</th><th>Fiyat</th><th></th></tr>
+
+{% for s in sepet %}
+<tr>
+<td>{{s.ad}}</td>
+<td>
+<a href="/azalt/{{s.barkod}}" class="btn btn-warning btn-sm">-</a>
+{{s.adet}}
+<a href="/arttir/{{s.barkod}}" class="btn btn-success btn-sm">+</a>
+</td>
+<td>{{s.fiyat}}</td>
+<td><a href="/sil/{{s.barkod}}" class="btn btn-danger btn-sm">Sil</a></td>
+</tr>
+{% endfor %}
+</table>
+
+<h4>Toplam: {{toplam}} TL</h4>
+
+<a href="/tamamla" class="btn btn-primary">Satışı Tamamla</a>
+
+{% endblock %}

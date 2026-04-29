@@ -20,17 +20,26 @@ def home():
 # 📦 STOK
 @app.route("/stok")
 def stok():
+    q = request.args.get("q", "")
+
     con = get_db()
     cur = con.cursor()
 
-    cur.execute("SELECT barkod, ad, yazar, fiyat, stok FROM kitaplar")
+    if q:
+        cur.execute("""
+            SELECT barkod, ad, yazar, fiyat, stok 
+            FROM kitaplar 
+            WHERE ad ILIKE %s OR yazar ILIKE %s OR barkod ILIKE %s
+        """, (f"%{q}%", f"%{q}%", f"%{q}%"))
+    else:
+        cur.execute("SELECT barkod, ad, yazar, fiyat, stok FROM kitaplar")
+
     rows = cur.fetchall()
 
     cur.close()
     con.close()
 
     return render_template("stok.html", kitaplar=rows)
-
 
 # ➕ ÜRÜN EKLE
 @app.route("/ekle", methods=["GET", "POST"])

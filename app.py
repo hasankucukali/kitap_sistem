@@ -243,5 +243,5 @@ def fis():
     toplam = session.get("toplam", 0)
     return render_template("fis.html", satis=satis, toplam=toplam)
 
-if _name_ == "__main__":
+if __name__ == "__main__":
     app.run()

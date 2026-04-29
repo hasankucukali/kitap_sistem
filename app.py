@@ -41,16 +41,22 @@ def home():
 # STOK + ARAMA
 @app.route("/stok")
 def stok():
-    q = request.args.get("q", "")
+    q = request.args.get("q")
 
     con = get_db()
     cur = con.cursor()
 
-    cur.execute("""
-    SELECT barkod, ad, yazar, fiyat, stok 
-    FROM kitaplar 
-    WHERE ad ILIKE %s OR yazar ILIKE %s OR barkod ILIKE %s
-    """, (f"%{q}%", f"%{q}%", f"%{q}%"))
+    if q:
+        cur.execute("""
+        SELECT barkod, ad, yazar, fiyat, stok 
+        FROM kitaplar 
+        WHERE ad ILIKE %s OR yazar ILIKE %s OR barkod ILIKE %s
+        """, (f"%{q}%", f"%{q}%", f"%{q}%"))
+    else:
+        cur.execute("""
+        SELECT barkod, ad, yazar, fiyat, stok 
+        FROM kitaplar
+        """)
 
     kitaplar = cur.fetchall()
 
@@ -58,7 +64,6 @@ def stok():
     con.close()
 
     return render_template("stok.html", kitaplar=kitaplar)
-
 # EKLE
 @app.route("/ekle", methods=["GET","POST"])
 def ekle():

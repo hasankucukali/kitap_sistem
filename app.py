@@ -265,9 +265,6 @@ def excel_yukle():
     try:
         file = request.files["file"]
 
-        if not file:
-            return "Dosya seçilmedi"
-
         df = pd.read_excel(file)
 
         con = get_db()
@@ -284,10 +281,7 @@ def excel_yukle():
             var = cur.fetchone()
 
             if var:
-                cur.execute(
-                    "UPDATE kitaplar SET stok = stok + %s WHERE barkod=%s",
-                    (stok, barkod)
-                )
+                cur.execute("UPDATE kitaplar SET stok = stok + %s WHERE barkod=%s", (stok, barkod))
             else:
                 cur.execute(
                     "INSERT INTO kitaplar (barkod, ad, yazar, fiyat, stok) VALUES (%s,%s,%s,%s,%s)",
@@ -302,6 +296,8 @@ def excel_yukle():
 
     except Exception as e:
         return "HATA: " + str(e)
+
+     
 
 if __name__ == "__main__":
     app.run()

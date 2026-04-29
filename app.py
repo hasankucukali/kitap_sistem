@@ -128,7 +128,7 @@ def excel_yukle():
     try:
         file = request.files["file"]
 
-        df = pd.read_excel_csv(file)
+        df = pd.read_csv(file)
 
         con = get_db()
         cur = con.cursor()

@@ -68,39 +68,49 @@ def stok():
 @app.route("/ekle", methods=["GET","POST"])
 def ekle():
     mesaj = ""
-    if not request.form.get("barkod") or not request.form.get("ad"):
-    return render_template("ekle.html", mesaj="Eksik bilgi"
 
     if request.method == "POST":
-        barkod = request.form["barkod"]
-        ad = request.form["ad"]
-        yazar = request.form["yazar"]
-        fiyat = float(request.form["fiyat"])
-        stok = int(request.form["stok"])
+        try:
+            barkod = request.form.get("barkod")
+            ad = request.form.get("ad")
+            yazar = request.form.get("yazar")
+            fiyat = request.form.get("fiyat")
+            stok = request.form.get("stok")
 
-        con = get_db()
-        cur = con.cursor()
+            if not barkod or not ad:
+                return render_template("ekle.html", mesaj="Barkod ve ad zorunlu")
 
-        cur.execute("SELECT * FROM kitaplar WHERE barkod=%s", (barkod,))
-        var = cur.fetchone()
+            fiyat = float(fiyat or 0)
+            stok = int(stok or 0)
 
-        if var:
-            cur.execute("UPDATE kitaplar SET stok = stok + %s WHERE barkod=%s",
-                        (stok, barkod))
-            mesaj = "Stok artırıldı"
-        else:
-            cur.execute("""
-            INSERT INTO kitaplar (barkod, ad, yazar, fiyat, stok)
-            VALUES (%s,%s,%s,%s,%s)
-            """, (barkod, ad, yazar, fiyat, stok))
-            mesaj = "Ürün eklendi"
+            con = get_db()
+            cur = con.cursor()
 
-        con.commit()
-        cur.close()
-        con.close()
+            # VAR MI KONTROL
+            cur.execute("SELECT * FROM kitaplar WHERE barkod=%s", (barkod,))
+            var = cur.fetchone()
+
+            if var:
+                cur.execute(
+                    "UPDATE kitaplar SET stok = stok + %s WHERE barkod=%s",
+                    (stok, barkod)
+                )
+                mesaj = "Stok artırıldı"
+            else:
+                cur.execute(
+                    "INSERT INTO kitaplar (barkod, ad, yazar, fiyat, stok) VALUES (%s,%s,%s,%s,%s)",
+                    (barkod, ad, yazar, fiyat, stok)
+                )
+                mesaj = "Ürün eklendi"
+
+            con.commit()
+            cur.close()
+            con.close()
+
+        except Exception as e:
+            mesaj = "Hata: " + str(e)
 
     return render_template("ekle.html", mesaj=mesaj)
-
 # EXCEL YÜKLE
 @app.route("/excel", methods=["GET","POST"])
 def excel():

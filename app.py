@@ -54,6 +54,11 @@ def home():
         return redirect("/login")
     return render_template("index.html")
 
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect("/login")
+
 
 # 📦 STOK
 @app.route("/stok")

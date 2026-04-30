@@ -27,7 +27,7 @@ button {
     font-size: 14px;
 }
 
-/* 🔥 YAZDIRIRKEN BUTONLARI GİZLE */
+/* 🔥 Yazdırırken butonları gizle */
 @media print {
     button {
         display: none;
@@ -39,16 +39,10 @@ button {
 function yazdirVeDon() {
     window.print();
 
-    // Yazdırma sonrası otomatik geri dön
     setTimeout(() => {
         window.location.href = "/satis";
     }, 1000);
 }
-
-// Sayfa açılır açılmaz yazdır
-window.onload = function() {
-    yazdirVeDon();
-};
 </script>
 
 </head>

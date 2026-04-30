@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, redirect, session
+from datetime import datetime
 import psycopg2
 import pandas as pd
 import os
@@ -41,7 +42,7 @@ def fis():
 
     toplam = sum(i["adet"] * i["fiyat"] for i in session["sepet"])
 
-    return render_template("fis.html", sepet=session["sepet"], toplam=toplam)
+    return render_template("fis.html", sepet=session["sepet"], toplam=toplam, tarih=datetime.now())
 # 🚪 LOGOUT
 
 

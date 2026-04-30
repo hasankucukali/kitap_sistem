@@ -201,6 +201,7 @@ def excel_yukle():
 # 💰 SATIŞ
 @app.route("/satis", methods=["GET", "POST"])
 def satis():
+    mesaj = session.pop("mesaj", "")
     if "login" not in session:
         return redirect("/login")
 
@@ -292,21 +293,50 @@ def stok_sil(barkod):
 # ✅ SATIŞ TAMAMLA
 @app.route("/tamamla")
 def tamamla():
+    if "sepet" not in session or len(session["sepet"]) == 0:
+        return redirect("/satis")
+
     con = get_db()
     cur = con.cursor()
+
+    toplam = 0
 
     for i in session["sepet"]:
         cur.execute(
             "UPDATE kitaplar SET stok = stok - %s WHERE barkod=%s AND stok >= %s",
             (i["adet"], i["barkod"], i["adet"])
         )
+        toplam += i["adet"] * i["fiyat"]
 
     con.commit()
     cur.close()
     con.close()
 
-    return redirect("/fis")
+    # 🔥 fiş için veriyi sakla
+    session["son_satis"] = session["sepet"]
+    session["son_toplam"] = toplam
 
+    # 🔥 sepeti temizle
+    session["sepet"] = []
+    session.modified = True
+
+    return redirect("/fis_sor")
+
+@app.route("/fis_sor")
+def fis_sor():
+    session["mesaj"] = "Satış tamamlandı ✅"
+    return render_template("fis_sor.html")
+
+from datetime import datetime
+
+@app.route("/fis_yazdir")
+def fis_yazdir():
+    return render_template(
+        "fis.html",
+        sepet=session.get("son_satis", []),
+        toplam=session.get("son_toplam", 0),
+        tarih=datetime.now()
+    )
 
 if __name__== "__main__":
     app.run(debug=True)

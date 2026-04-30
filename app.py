@@ -26,7 +26,7 @@ def login():
         kullanici = request.form["kullanici"]
         sifre = request.form["sifre"]
 
-        if kullanici == "admin" and sifre == "1234":
+        if kullanici == "hasan" and sifre == "6161":
             session["login"] = True
             return redirect("/")
         else:

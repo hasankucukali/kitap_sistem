@@ -330,6 +330,10 @@ def fis_sor():
     return render_template("fis_sor.html")
 
 from datetime import datetime
+@app.route("/fis_hayir")
+def fis_hayir():
+    session["mesaj"] = "Satış tamamlandı ✅"
+    return redirect("/satis")
 
 @app.route("/fis_yazdir")
 def fis_yazdir():

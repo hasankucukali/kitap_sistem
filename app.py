@@ -295,6 +295,8 @@ def stok_sil(barkod):
 def tamamla():
     if "sepet" not in session or len(session["sepet"]) == 0:
         return redirect("/satis")
+    odeme = request.form.get("odeme", "nakit")
+    session["son_odeme"] = odeme
 
     con = get_db()
     cur = con.cursor()

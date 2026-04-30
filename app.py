@@ -128,19 +128,45 @@ def excel_yukle():
     try:
         file = request.files["file"]
 
-        df = pd.read_csv(file, sep=";", encoding="utf-8-sig")
+        if not file:
+            return "Dosya seçilmedi"
+
+        filename = file.filename.lower()
+
+        # 🔥 Dosya tipine göre oku
+        if filename.endswith(".csv"):
+            df = pd.read_csv(file, sep=';', encoding='utf-8-sig')
+        elif filename.endswith(".xlsx"):
+            df = pd.read_excel(file)
+        else:
+            return "Sadece CSV veya XLSX yükleyebilirsin"
+
+        # 🔥 BOŞLUK TEMİZLE
         df.columns = df.columns.str.strip().str.lower()
-        df = df. fillna(0)
+        df = df.fillna(0)
+
+        # 🔥 GEREKLİ KOLON KONTROL
+        gerekli = ["barkod", "ad", "yazar", "fiyat", "stok"]
+        for col in gerekli:
+            if col not in df.columns:
+                return f"HATA: '{col}' kolonu eksik"
 
         con = get_db()
         cur = con.cursor()
 
+        eklenen = 0
+        guncellenen = 0
+
         for _, row in df.iterrows():
-            barkod = str(row["barkod"])
-            ad = row["ad"]
-            yazar = row["yazar"]
-            fiyat = float(row["fiyat"])
-            stok = int(row["stok"])
+            barkod = str(row["barkod"]).strip()
+            ad = str(row["ad"]).strip()
+            yazar = str(row["yazar"]).strip()
+
+            fiyat = float(row["fiyat"]) if pd.notna(row["fiyat"]) else 0
+            stok = int(row["stok"]) if pd.notna(row["stok"]) else 0
+
+            if barkod == "":
+                continue  # boş satır atla
 
             cur.execute("SELECT * FROM kitaplar WHERE barkod=%s", (barkod,))
             var = cur.fetchone()
@@ -150,22 +176,22 @@ def excel_yukle():
                     "UPDATE kitaplar SET stok = stok + %s WHERE barkod=%s",
                     (stok, barkod)
                 )
+                guncellenen += 1
             else:
                 cur.execute(
                     "INSERT INTO kitaplar (barkod, ad, yazar, fiyat, stok) VALUES (%s,%s,%s,%s,%s)",
                     (barkod, ad, yazar, fiyat, stok)
                 )
+                eklenen += 1
 
         con.commit()
         cur.close()
         con.close()
 
-        return redirect("/stok")
+        return f"✅ {eklenen} yeni eklendi, {guncellenen} güncellendi"
 
     except Exception as e:
         return "HATA: " + str(e)
-
-
 # 💰 SATIŞ
 @app.route("/satis", methods=["GET", "POST"])
 def satis():

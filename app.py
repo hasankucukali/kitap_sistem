@@ -277,8 +277,12 @@ def sil(barkod):
     return redirect("/satis")
 
 
-@app.route("/tamamla", methods=[ "POST" ])
+@app.route("/tamamla", methods=["POST"])
 def tamamla():
+
+    odeme = request.form.get("odeme", "nakit")
+    session["son_odeme"] = odeme
+    
     if "sepet" not in session or len(session["sepet"]) == 0:
         return redirect("/satis")
 

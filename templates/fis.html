@@ -1,18 +1,67 @@
 <!DOCTYPE html>
-<html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<title>Fiş</title>
+
+<style>
+body {
+    font-family: monospace;
+    width: 300px;
+    margin: auto;
+}
+
+.center {
+    text-align: center;
+}
+
+hr {
+    border: 1px dashed black;
+}
+
+button {
+    margin-top: 10px;
+    width: 100%;
+    padding: 10px;
+}
+</style>
+
+<script>
+function yazdir() {
+    window.print();
+}
+</script>
+
+</head>
+
 <body>
 
-<h3>KASA FİŞİ</h3>
+<div class="center">
+    <h3>📚 KİTAP SİSTEM</h3>
+    <p>Tarih: {{ tarih}}</p>
+</div>
+
 <hr>
 
-{% for s in satis %}
-<p>{{s.ad}} x{{s.adet}} = {{s.adet * s.fiyat}} TL</p>
+{% for i in sepet %}
+<p>
+{{i.ad}}<br>
+{{i.adet}} x {{i.fiyat}} = {{i.adet * i.fiyat}} ₺
+</p>
 {% endfor %}
 
 <hr>
-<h3>TOPLAM: {{toplam}} TL</h3>
 
-<button onclick="window.print()">Yazdır</button>
+<h3>Toplam: {{toplam}} ₺</h3>
+
+<hr>
+
+<div class="center">
+    <p>Teşekkür ederiz</p>
+</div>
+
+<button onclick="yazdir()">🧾 Yazdır</button>
+<a href="/satis"><button>⬅️ Geri</button></a>
 
 </body>
 </html>

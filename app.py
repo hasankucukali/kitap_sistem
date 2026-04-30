@@ -130,6 +130,7 @@ def excel_yukle():
 
         df = pd.read_csv(file, sep=";", encoding="utf-8-sig")
         df.columns = df.columns.str.strip().str.lower()
+        df = df. fillna(0)
 
         con = get_db()
         cur = con.cursor()

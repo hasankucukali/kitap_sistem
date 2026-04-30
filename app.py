@@ -37,6 +37,8 @@ def login():
 
 from datetime import datetime
 
+from datetime import datetime
+
 @app.route("/fis")
 def fis():
     if "sepet" not in session or len(session["sepet"]) == 0:
@@ -44,10 +46,9 @@ def fis():
 
     toplam = sum(i["adet"] * i["fiyat"] for i in session["sepet"])
 
-    # 🔥 SEPETİ GEÇİCİ KOPYALA
     sepet_kopya = session["sepet"]
 
-    # 🔥 BURADA TEMİZLE (çok önemli)
+    # 🔥 sepet temizlenir (yeni satış için)
     session["sepet"] = []
     session.modified = True
 
@@ -55,7 +56,8 @@ def fis():
         "fis.html",
         sepet=sepet_kopya,
         toplam=toplam,
-        tarih=datetime.now()
+        tarih=datetime.now(),
+        mesaj="Satış tamamlandı ✅"
     )
 # 🚪 LOGOUT
 

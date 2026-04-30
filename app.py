@@ -325,7 +325,7 @@ def tamamla():
 @app.route("/fis_sor")
 def fis_sor():
     session["mesaj"] = "Satış tamamlandı ✅"
-    return render_template("fis_sor.html")
+    return render_template("fis_sor.html"
 
 from datetime import datetime
 

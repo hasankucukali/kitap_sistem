@@ -333,12 +333,13 @@ from datetime import datetime
 
 @app.route("/fis_yazdir")
 def fis_yazdir():
-    return render_template(
-        "fis.html",
-        sepet=session.get("son_satis", []),
-        toplam=session.get("son_toplam", 0),
-        tarih=datetime.now()
-    )
+return render_template(
+    "fis.html",
+    sepet=session.get("son_satis", []),
+    toplam=session.get("son_toplam", 0),
+    tarih=datetime.now(),
+    odeme=session.get("son_odeme", "nakit")
+)
 
 if __name__== "__main__":
     app.run(debug=True)

@@ -27,7 +27,7 @@ def login():
         sifre = request.form["sifre"]
 
         if kullanici == "hasan" and sifre == "6161":
-            session["login"] = True
+            ["login"] = True
             return redirect("/")
         else:
             hata = "Hatalı giriş"
@@ -290,13 +290,10 @@ def stok_sil(barkod):
     return redirect("/stok")
 
 
-# ✅ SATIŞ TAMAMLA
 @app.route("/tamamla")
 def tamamla():
     if "sepet" not in session or len(session["sepet"]) == 0:
         return redirect("/satis")
-    odeme = request.form.get("odeme", "nakit")
-    session["son_odeme"] = odeme
 
     con = get_db()
     cur = con.cursor()
@@ -315,11 +312,12 @@ def tamamla():
     con.close()
 
     # 🔥 fiş için veriyi sakla
-    session["son_satis"] = list(session["sepet"]
-session["son_toplam"] = toplam
+    session["son_satis"] = list(session["sepet"])
+    session["son_toplam"] = toplam
 
-odeme = request.args.get("odeme", "nakit")
-session["son_odeme"] = odeme
+    odeme = request.args.get("odeme", "nakit")
+    session["son_odeme"] = odeme
+
     # 🔥 sepeti temizle
     session["sepet"] = []
     session.modified = True

@@ -35,6 +35,8 @@ def login():
     return render_template("login.html", hata=hata)
 
 
+from datetime import datetime
+
 @app.route("/fis")
 def fis():
     if "sepet" not in session or len(session["sepet"]) == 0:
@@ -42,7 +44,19 @@ def fis():
 
     toplam = sum(i["adet"] * i["fiyat"] for i in session["sepet"])
 
-    return render_template("fis.html", sepet=session["sepet"], toplam=toplam, tarih=datetime.now())
+    # 🔥 SEPETİ GEÇİCİ KOPYALA
+    sepet_kopya = session["sepet"]
+
+    # 🔥 BURADA TEMİZLE (çok önemli)
+    session["sepet"] = []
+    session.modified = True
+
+    return render_template(
+        "fis.html",
+        sepet=sepet_kopya,
+        toplam=toplam,
+        tarih=datetime.now()
+    )
 # 🚪 LOGOUT
 
 

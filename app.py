@@ -34,6 +34,14 @@ def login():
     return render_template("login.html", hata=hata)
 
 
+@app.route("/fis")
+def fis():
+    if "sepet" not in session or len(session["sepet"]) == 0:
+        return redirect("/satis")
+
+    toplam = sum(i["adet"] * i["fiyat"] for i in session["sepet"])
+
+    return render_template("fis.html", sepet=session["sepet"], toplam=toplam)
 # 🚪 LOGOUT
 
 
@@ -283,7 +291,7 @@ def tamamla():
     session["sepet"] = []
     session.modified = True
 
-    return redirect("/stok")
+    return redirect("/fis")
 
 
 if __name__== "__main__":

@@ -6,34 +6,65 @@ import os
 app = Flask(__name__)
 app.secret_key = "secret123"
 
-# 🔥 DATABASE BAĞLANTI
+# 🔥 DATABASE
 def get_db():
-    return psycopg2.connect(os.environ.get("DATABASE_URL"))
+    url = os.environ.get("DATABASE_URL")
+
+    if url.startswith("postgres://"):
+        url = url.replace("postgres://", "postgresql://", 1)
+
+    return psycopg2.connect(url)
+
+
+# 🔐 LOGIN
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    hata = ""
+
+    if request.method == "POST":
+        kullanici = request.form["kullanici"]
+        sifre = request.form["sifre"]
+
+        if kullanici == "admin" and sifre == "1234":
+            session["login"] = True
+            return redirect("/")
+        else:
+            hata = "Hatalı giriş"
+
+    return render_template("login.html", hata=hata)
+
+
+# 🚪 LOGOUT
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect("/login")
+
+
+# 🔒 LOGIN KONTROL
+def kontrol():
+    if "login" not in session:
+        return redirect("/login")
 
 
 # 🏠 ANA SAYFA
 @app.route("/")
 def home():
+    if "login" not in session:
+        return redirect("/login")
     return render_template("index.html")
 
 
 # 📦 STOK
 @app.route("/stok")
 def stok():
-    q = request.args.get("q", "")
+    if "login" not in session:
+        return redirect("/login")
 
     con = get_db()
     cur = con.cursor()
 
-    if q:
-        cur.execute("""
-            SELECT barkod, ad, yazar, fiyat, stok 
-            FROM kitaplar 
-            WHERE ad ILIKE %s OR yazar ILIKE %s OR barkod ILIKE %s
-        """, (f"%{q}%", f"%{q}%", f"%{q}%"))
-    else:
-        cur.execute("SELECT barkod, ad, yazar, fiyat, stok FROM kitaplar")
-
+    cur.execute("SELECT barkod, ad, yazar, fiyat, stok FROM kitaplar")
     rows = cur.fetchall()
 
     cur.close()
@@ -41,164 +72,105 @@ def stok():
 
     return render_template("stok.html", kitaplar=rows)
 
+
 # ➕ ÜRÜN EKLE
 @app.route("/ekle", methods=["GET", "POST"])
 def ekle():
+    if "login" not in session:
+        return redirect("/login")
+
     mesaj = ""
 
     if request.method == "POST":
-        try:
-            barkod = request.form["barkod"]
-            ad = request.form["ad"]
-            yazar = request.form["yazar"]
-            fiyat = float(request.form["fiyat"])
-            stok = int(request.form["stok"])
-
-            con = get_db()
-            cur = con.cursor()
-
-            cur.execute("SELECT * FROM kitaplar WHERE barkod=%s", (barkod,))
-            var = cur.fetchone()
-
-            if var:
-                cur.execute(
-                    "UPDATE kitaplar SET stok = stok + %s WHERE barkod=%s",
-                    (stok, barkod)
-                )
-                mesaj = "Stok artırıldı"
-            else:
-                cur.execute(
-                    "INSERT INTO kitaplar (barkod, ad, yazar, fiyat, stok) VALUES (%s,%s,%s,%s,%s)",
-                    (barkod, ad, yazar, fiyat, stok)
-                )
-                mesaj = "Ürün eklendi"
-
-            con.commit()
-            cur.close()
-            con.close()
-
-        except Exception as e:
-            mesaj = "Hata: " + str(e)
-
-    return render_template("ekle.html", mesaj=mesaj)
-
-@app.route("/stok_sil/<barkod>")
-def stok_sil(barkod):
-    con = get_db()
-    cur = con.cursor()
-
-    cur.execute("DELETE FROM kitaplar WHERE barkod=%s", (barkod,))
-
-    con.commit()
-    cur.close()
-    con.close()
-
-    return redirect("/stok")
-
-@app.route("/stok_arttir/<barkod>")
-def stok_arttir(barkod):
-    con = get_db()
-    cur = con.cursor()
-
-    cur.execute("UPDATE kitaplar SET stok = stok + 1 WHERE barkod=%s", (barkod,))
-
-    con.commit()
-    cur.close()
-    con.close()
-
-    return redirect("/stok")
-
-@app.route("/stok_azalt/<barkod>")
-def stok_azalt(barkod):
-    con = get_db()
-    cur = con.cursor()
-
-    cur.execute("UPDATE kitaplar SET stok = stok - 1 WHERE barkod=%s AND stok > 0", (barkod,))
-
-    con.commit()
-    cur.close()
-    con.close()
-
-    return redirect("/stok")
-
-
-# 📥 EXCEL YÜKLE
-@app.route("/excel_yukle", methods=["POST"])
-def excel_yukle():
-    try:
-        file = request.files["file"]
-
-        if not file:
-            return "Dosya seçilmedi"
-
-        filename = file.filename.lower()
-
-        # 🔥 Dosya tipine göre okuma
-        if filename.endswith(".csv"):
-            df = pd.read_csv(file, sep=';', encoding='utf-8-sig')
-        elif filename.endswith(".xlsx"):
-            df = pd.read_excel(file)
-        else:
-            return "Sadece CSV veya XLSX yükleyebilirsin"
-
-        # 🔥 kolonları temizle
-        df.columns = df.columns.str.strip().str.lower()
-
-        # 🔥 boşları doldur
-        df = df.fillna(0)
-
-        gerekli = ["barkod", "ad", "yazar", "fiyat", "stok"]
-        for col in gerekli:
-            if col not in df.columns:
-                return f"HATA: '{col}' kolonu eksik"
+        barkod = request.form["barkod"]
+        ad = request.form["ad"]
+        yazar = request.form["yazar"]
+        fiyat = float(request.form["fiyat"])
+        stok = int(request.form["stok"])
 
         con = get_db()
         cur = con.cursor()
 
-        for _, row in df.iterrows():
+        cur.execute("SELECT * FROM kitaplar WHERE barkod=%s", (barkod,))
+        var = cur.fetchone()
 
-            # 🔥 BARKOD DÜZELT (SONUNA 0 EKLEMEYİ ENGELLER)
-            barkod = str(row["barkod"]).replace(".0", "").strip()
-
-            if barkod == "":
-                continue
-
-            ad = str(row["ad"]).strip()
-            yazar = str(row["yazar"]).strip()
-
-            fiyat = float(row["fiyat"]) if pd.notna(row["fiyat"]) else 0
-            stok = int(row["stok"]) if pd.notna(row["stok"]) else 0
-
-            cur.execute("SELECT * FROM kitaplar WHERE barkod=%s", (barkod,))
-            var = cur.fetchone()
-
-            if var:
-                cur.execute(
-                    "UPDATE kitaplar SET stok = stok + %s WHERE barkod=%s",
-                    (stok, barkod)
-                )
-            else:
-                cur.execute(
-                    "INSERT INTO kitaplar (barkod, ad, yazar, fiyat, stok) VALUES (%s,%s,%s,%s,%s)",
-                    (barkod, ad, yazar, fiyat, stok)
-                )
+        if var:
+            cur.execute("UPDATE kitaplar SET stok = stok + %s WHERE barkod=%s", (stok, barkod))
+            mesaj = "Stok artırıldı"
+        else:
+            cur.execute(
+                "INSERT INTO kitaplar (barkod, ad, yazar, fiyat, stok) VALUES (%s,%s,%s,%s,%s)",
+                (barkod, ad, yazar, fiyat, stok)
+            )
+            mesaj = "Ürün eklendi"
 
         con.commit()
         cur.close()
         con.close()
 
-        # 🔥 YÜKLEDİKTEN SONRA STOK SAYFASINA GÖNDER
-        return redirect("/stok")
+    return render_template("ekle.html", mesaj=mesaj)
 
-    except Exception as e:
-        return "HATA: " + str(e)
+
+# 📥 CSV / EXCEL YÜKLE
+@app.route("/excel_yukle", methods=["POST"])
+def excel_yukle():
+    if "login" not in session:
+        return redirect("/login")
+
+    file = request.files["file"]
+
+    filename = file.filename.lower()
+
+    if filename.endswith(".csv"):
+        df = pd.read_csv(file, sep=';', encoding='utf-8-sig')
+    else:
+        df = pd.read_excel(file)
+
+    df.columns = df.columns.str.strip().str.lower()
+    df = df.fillna(0)
+
+    con = get_db()
+    cur = con.cursor()
+
+    for _, row in df.iterrows():
+        barkod = str(row["barkod"]).replace(".0", "").strip()
+
+        if barkod == "":
+            continue
+
+        ad = str(row["ad"])
+        yazar = str(row["yazar"])
+        fiyat = float(row["fiyat"])
+        stok = int(row["stok"])
+
+        cur.execute("SELECT * FROM kitaplar WHERE barkod=%s", (barkod,))
+        var = cur.fetchone()
+
+        if var:
+            cur.execute("UPDATE kitaplar SET stok = stok + %s WHERE barkod=%s", (stok, barkod))
+        else:
+            cur.execute(
+                "INSERT INTO kitaplar (barkod, ad, yazar, fiyat, stok) VALUES (%s,%s,%s,%s,%s)",
+                (barkod, ad, yazar, fiyat, stok)
+            )
+
+    con.commit()
+    cur.close()
+    con.close()
+
+    return redirect("/stok")
+
+
 # 💰 SATIŞ
 @app.route("/satis", methods=["GET", "POST"])
 def satis():
-    mesaj = ""
+    if "login" not in session:
+        return redirect("/login")
 
     if "sepet" not in session:
         session["sepet"] = []
+
+    mesaj = ""
 
     if request.method == "POST":
         barkod = request.form["barkod"]
@@ -206,7 +178,7 @@ def satis():
         con = get_db()
         cur = con.cursor()
 
-        cur.execute("SELECT ad, fiyat, stok FROM kitaplar WHERE barkod=%s", (barkod,))
+        cur.execute("SELECT ad, fiyat FROM kitaplar WHERE barkod=%s", (barkod,))
         urun = cur.fetchone()
 
         cur.close()
@@ -219,7 +191,6 @@ def satis():
                 if i["barkod"] == barkod:
                     i["adet"] += 1
                     bulundu = True
-                    break
 
             if not bulundu:
                 session["sepet"].append({
@@ -229,44 +200,37 @@ def satis():
                     "adet": 1
                 })
         else:
-            mesaj = "Ürün bulunamadı"
+            mesaj = "Ürün yok"
+
+    session.modified = True
 
     toplam = sum(i["adet"] * i["fiyat"] for i in session["sepet"])
-    session.modified = True
 
     return render_template("satis.html", sepet=session["sepet"], toplam=toplam, mesaj=mesaj)
 
 
-# ➕ ARTIR
+# ➕ ➖ ❌
 @app.route("/arttir/<barkod>")
 def arttir(barkod):
     for i in session["sepet"]:
         if i["barkod"] == barkod:
             i["adet"] += 1
-            break
-
     session.modified = True
     return redirect("/satis")
 
 
-# ➖ AZALT
 @app.route("/azalt/<barkod>")
 def azalt(barkod):
     for i in session["sepet"]:
         if i["barkod"] == barkod and i["adet"] > 1:
             i["adet"] -= 1
-        
-
     session.modified = True
     return redirect("/satis")
 
 
-# ❌ SİL
 @app.route("/sil/<barkod>")
 def sil(barkod):
     session["sepet"] = [i for i in session["sepet"] if i["barkod"] != barkod]
-    
-
     session.modified = True
     return redirect("/satis")
 
@@ -288,11 +252,10 @@ def tamamla():
     con.close()
 
     session["sepet"] = []
+    session.modified = True
 
     return redirect("/stok")
 
 
-# 🚀 ÇALIŞTIRMA
-if __name__ == "__main__":
+if __name__== "__main__":
     app.run(debug=True)
-    #redeploy

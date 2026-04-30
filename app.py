@@ -133,7 +133,7 @@ def excel_yukle():
 
         filename = file.filename.lower()
 
-        # 🔥 Dosya tipine göre oku
+        # 🔥 Dosya tipine göre okuma
         if filename.endswith(".csv"):
             df = pd.read_csv(file, sep=';', encoding='utf-8-sig')
         elif filename.endswith(".xlsx"):
@@ -141,11 +141,12 @@ def excel_yukle():
         else:
             return "Sadece CSV veya XLSX yükleyebilirsin"
 
-        # 🔥 BOŞLUK TEMİZLE
+        # 🔥 kolonları temizle
         df.columns = df.columns.str.strip().str.lower()
+
+        # 🔥 boşları doldur
         df = df.fillna(0)
 
-        # 🔥 GEREKLİ KOLON KONTROL
         gerekli = ["barkod", "ad", "yazar", "fiyat", "stok"]
         for col in gerekli:
             if col not in df.columns:
@@ -154,19 +155,19 @@ def excel_yukle():
         con = get_db()
         cur = con.cursor()
 
-        eklenen = 0
-        guncellenen = 0
-
         for _, row in df.iterrows():
-            barkod = str(row["barkod"]).strip()
+
+            # 🔥 BARKOD DÜZELT (SONUNA 0 EKLEMEYİ ENGELLER)
+            barkod = str(row["barkod"]).replace(".0", "").strip()
+
+            if barkod == "":
+                continue
+
             ad = str(row["ad"]).strip()
             yazar = str(row["yazar"]).strip()
 
             fiyat = float(row["fiyat"]) if pd.notna(row["fiyat"]) else 0
             stok = int(row["stok"]) if pd.notna(row["stok"]) else 0
-
-            if barkod == "":
-                continue  # boş satır atla
 
             cur.execute("SELECT * FROM kitaplar WHERE barkod=%s", (barkod,))
             var = cur.fetchone()
@@ -176,19 +177,18 @@ def excel_yukle():
                     "UPDATE kitaplar SET stok = stok + %s WHERE barkod=%s",
                     (stok, barkod)
                 )
-                guncellenen += 1
             else:
                 cur.execute(
                     "INSERT INTO kitaplar (barkod, ad, yazar, fiyat, stok) VALUES (%s,%s,%s,%s,%s)",
                     (barkod, ad, yazar, fiyat, stok)
                 )
-                eklenen += 1
 
         con.commit()
         cur.close()
         con.close()
 
-        return f"✅ {eklenen} yeni eklendi, {guncellenen} güncellendi"
+        # 🔥 YÜKLEDİKTEN SONRA STOK SAYFASINA GÖNDER
+        return redirect("/stok")
 
     except Exception as e:
         return "HATA: " + str(e)

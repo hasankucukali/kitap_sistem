@@ -37,9 +37,13 @@ button {
 </style>
 
 <script>
-function yazdir() {
+window.onload = function() {
     window.print();
-}
+
+    setTimeout(() => {
+        window.location.href = "/satis";
+    }, 1000);
+};
 </script>
 
 </head>

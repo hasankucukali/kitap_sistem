@@ -20,12 +20,16 @@
 
 <h3>💰 Satış Ekranı</h3>
 
+{% if mesaj %}
+<h4 style="color:green;">{{ mesaj }}</h4>
+{% endif %}
+
 <form method="post">
     <input name="barkod" class="form-control" placeholder="Barkod okut" autofocus>
     <button class="btn btn-success mt-2">Ekle</button>
 </form>
 
-<p class="text-danger">{{mesaj}}</p>
+
 
 <hr>
 

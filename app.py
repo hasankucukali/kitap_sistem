@@ -27,7 +27,7 @@ def login():
         sifre = request.form["sifre"]
 
         if kullanici == "hasan" and sifre == "6161":
-            ["login"] = True
+            session["login"] = True
             return redirect("/")
         else:
             hata = "Hatalı giriş"

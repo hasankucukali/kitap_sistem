@@ -315,9 +315,11 @@ def tamamla():
     con.close()
 
     # 🔥 fiş için veriyi sakla
-    session["son_satis"] = session["sepet"]
-    session["son_toplam"] = toplam
+    session["son_satis"] = list(session["sepet"]
+session["son_toplam"] = toplam
 
+odeme = request.args.get("odeme", "nakit")
+session["son_odeme"] = odeme
     # 🔥 sepeti temizle
     session["sepet"] = []
     session.modified = True

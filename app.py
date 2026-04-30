@@ -322,7 +322,7 @@ def tamamla():
     session["sepet"] = []
     session.modified = True
 
-    return redirect("/fis_sor")
+    return redirect("/sor")
 
 @app.route("/fis_sor")
 def fis_sor():

@@ -289,9 +289,6 @@ def tamamla():
     cur.close()
     con.close()
 
-    session["sepet"] = []
-    session.modified = True
-
     return redirect("/fis")
 
 

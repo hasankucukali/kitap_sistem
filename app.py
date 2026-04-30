@@ -60,13 +60,23 @@ def logout():
 # 📦 STOK
 @app.route("/stok")
 def stok():
-    if "login" not in session:
-        return redirect("/login")
+    q = request.args.get("q")
 
     con = get_db()
     cur = con.cursor()
 
-    cur.execute("SELECT barkod, ad, yazar, fiyat, stok FROM kitaplar")
+    if q:
+        cur.execute("""
+            SELECT barkod, ad, yazar, fiyat, stok 
+            FROM kitaplar
+            WHERE 
+                barkod ILIKE %s OR 
+                ad ILIKE %s OR 
+                yazar ILIKE %s
+        """, (f"%{q}%", f"%{q}%", f"%{q}%"))
+    else:
+        cur.execute("SELECT barkod, ad, yazar, fiyat, stok FROM kitaplar")
+
     rows = cur.fetchall()
 
     cur.close()

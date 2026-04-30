@@ -35,10 +35,7 @@ def login():
 
 
 # 🚪 LOGOUT
-@app.route("/logout")
-def logout():
-    session.clear()
-    return redirect("/login")
+
 
 
 # 🔒 LOGIN KONTROL

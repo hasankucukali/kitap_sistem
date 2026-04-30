@@ -290,7 +290,7 @@ def stok_sil(barkod):
     return redirect("/stok")
 
 
-@app.route("/tamamla")
+@app.route("/tamamla", methods=[ "POST" ])
 def tamamla():
     if "sepet" not in session or len(session["sepet"]) == 0:
         return redirect("/satis")

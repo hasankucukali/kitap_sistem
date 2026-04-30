@@ -109,6 +109,47 @@ def stok():
 
     return render_template("stok.html", kitaplar=rows)
 
+@app.route("/stok_arttir/<barkod>")
+def stok_arttir(barkod):
+    con = get_db()
+    cur = con.cursor()
+
+    cur.execute("UPDATE kitaplar SET stok = stok + 1 WHERE barkod=%s", (barkod,))
+
+    con.commit()
+    cur.close()
+    con.close()
+
+    return redirect("/stok")
+
+
+@app.route("/stok_azalt/<barkod>")
+def stok_azalt(barkod):
+    con = get_db()
+    cur = con.cursor()
+
+    cur.execute("UPDATE kitaplar SET stok = stok - 1 WHERE barkod=%s AND stok > 0", (barkod,))
+
+    con.commit()
+    cur.close()
+    con.close()
+
+    return redirect("/stok")
+
+
+@app.route("/stok_sil/<barkod>")
+def stok_sil(barkod):
+    con = get_db()
+    cur = con.cursor()
+
+    cur.execute("DELETE FROM kitaplar WHERE barkod=%s", (barkod,))
+
+    con.commit()
+    cur.close()
+    con.close()
+
+    return redirect("/stok")
+
 
 # ➕ ÜRÜN EKLE
 @app.route("/ekle", methods=["GET", "POST"])

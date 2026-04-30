@@ -25,7 +25,12 @@
 {% endif %}
 
 <form method="post">
-    <input name="barkod" class="form-control" placeholder="Barkod okut" autofocus>
+    <input name="barkod"
+           class="form-control"
+           placeholder="Barkod okut"
+           autofocus
+           oninput="this.form.submit()">
+</form>
 
     <div class="mt-2">
         <label>Ödeme Türü:</label><br>

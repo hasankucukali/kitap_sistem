@@ -49,7 +49,7 @@ body {
 
 <h2>🧾 SATIŞ EKRANI</h2>
 
-<!-- 🔥 Barkod okuma -->
+<!-- 🔥 Barkod -->
 <form method="post" id="form">
     <input name="barkod"
            id="barkod"
@@ -69,6 +69,7 @@ body {
 <th>Adet</th>
 <th>Fiyat</th>
 <th>Toplam</th>
+<th>İşlem</th>
 </tr>
 
 {% for i in sepet %}
@@ -77,6 +78,12 @@ body {
 <td>{{ i.adet }}</td>
 <td>{{ i.fiyat }}</td>
 <td>{{ i.adet * i.fiyat }}</td>
+
+<td>
+<a href="/arttir/{{i.barkod}}" class="btn btn-success btn-sm">+</a>
+<a href="/azalt/{{i.barkod}}" class="btn btn-warning btn-sm">-</a>
+<a href="/sil/{{i.barkod}}" class="btn btn-danger btn-sm">X</a>
+</td>
 </tr>
 {% endfor %}
 </table>
@@ -101,7 +108,7 @@ Toplam: {{ toplam }} ₺
     </div>
 </div>
 
-<!-- ✅ Satış tamamla -->
+<!-- ✅ Satış -->
 <form action="/tamamla" method="post">
     <input type="hidden" name="odeme" id="odeme" value="nakit">
 
@@ -116,7 +123,7 @@ Toplam: {{ toplam }} ₺
 <audio id="beep" src="https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg"></audio>
 
 <script>
-// 🔥 Barkod ENTER ile gönder
+// ENTER → gönder
 document.getElementById("barkod").addEventListener("keypress", function(e){
     if(e.key === "Enter"){
         e.preventDefault();
@@ -124,12 +131,12 @@ document.getElementById("barkod").addEventListener("keypress", function(e){
     }
 });
 
-// 🔥 Input sürekli aktif
+// sürekli focus
 setInterval(()=>{
     document.getElementById("barkod").focus();
 },500);
 
-// 🔥 Son ürün flash + beep
+// flash + beep
 window.onload = () => {
     let rows = document.querySelectorAll(".urun");
     if(rows.length > 0){
@@ -138,7 +145,7 @@ window.onload = () => {
     }
 }
 
-// 💳 Ödeme seçimi
+// ödeme seçimi
 function sec(tip){
     document.getElementById("odeme").value = tip;
 

@@ -39,11 +39,12 @@
 <tbody>
 {% for k in kitaplar %}
 <tr>
-<td>{{k[0]}}</td>
-<td>{{k[1]}}</td>
-<td>{{k[2]}}</td>
-<td>{{k[3]}}</td>
-<td>{{k[4]}}</td>
+<td>{{ kitap[0] }}</td>
+<td>{{ kitap[1] }}</td>
+<td>{{ kitap[2] }}</td>
+<td>{{ kitap[3] }}</td>
+<td>{{ kitap[4] }}</td>
+
 <td>
 <a href="/stok_arttir/{{kitap[0]}}" class="btn btn-success btn-sm">+</a>
 <a href="/stok_azalt/{{kitap[0]}}" class="btn btn-warning btn-sm">-</a>

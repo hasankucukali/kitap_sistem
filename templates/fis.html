@@ -25,6 +25,7 @@ button {
     width: 100%;
     padding: 10px;
     font-size: 14px;
+    cursor: pointer;
 }
 
 /* 🔥 Yazdırırken butonları gizle */
@@ -36,12 +37,8 @@ button {
 </style>
 
 <script>
-function yazdirVeDon() {
+function yazdir() {
     window.print();
-
-    setTimeout(() => {
-        window.location.href = "/satis";
-    }, 1000);
 }
 </script>
 
@@ -70,10 +67,12 @@ function yazdirVeDon() {
 <hr>
 
 <div class="center">
+    <h3 style="color:green;">{{mesaj}}</h3>
     <p>Teşekkür ederiz</p>
 </div>
 
-<button onclick="yazdirVeDon()">🧾 Yazdır</button>
+<button onclick="yazdir()">🧾 Fiş Yazdır</button>
+<a href="/satis"><button>⬅️ Yeni Satış</button></a>
 
 </body>
 </html>

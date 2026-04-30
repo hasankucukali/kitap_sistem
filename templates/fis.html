@@ -9,6 +9,7 @@ body {
     font-family: monospace;
     width: 300px;
     margin: auto;
+    padding: 10px;
 }
 
 .center {
@@ -23,13 +24,31 @@ button {
     margin-top: 10px;
     width: 100%;
     padding: 10px;
+    font-size: 14px;
+}
+
+/* 🔥 YAZDIRIRKEN BUTONLARI GİZLE */
+@media print {
+    button {
+        display: none;
+    }
 }
 </style>
 
 <script>
-function yazdir() {
+function yazdirVeDon() {
     window.print();
+
+    // Yazdırma sonrası otomatik geri dön
+    setTimeout(() => {
+        window.location.href = "/satis";
+    }, 1000);
 }
+
+// Sayfa açılır açılmaz yazdır
+window.onload = function() {
+    yazdirVeDon();
+};
 </script>
 
 </head>
@@ -37,8 +56,8 @@ function yazdir() {
 <body>
 
 <div class="center">
-    <h3>📚 KİTAP SİSTEM</h3>
-    <p>Tarih: {{ tarih}}</p>
+    <h3>📚 GENÇ KİTABEVİ </h3>
+    <p>{{tarih}}</p>
 </div>
 
 <hr>
@@ -60,8 +79,7 @@ function yazdir() {
     <p>Teşekkür ederiz</p>
 </div>
 
-<button onclick="yazdir()">🧾 Yazdır</button>
-<a href="/satis"><button>⬅️ Geri</button></a>
+<button onclick="yazdirVeDon()">🧾 Yazdır</button>
 
 </body>
 </html>

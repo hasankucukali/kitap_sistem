@@ -322,7 +322,7 @@ def tamamla():
     session["sepet"] = []
     session.modified = True
 
-    return redirect("/sor")
+    return redirect("/fis_sor")
 
 @app.route("/fis_sor")
 def fis_sor():
@@ -333,7 +333,7 @@ from datetime import datetime
 
 @app.route("/fis_yazdir")
 def fis_yazdir():
-return render_template(
+    return render_template(
     "fis.html",
     sepet=session.get("son_satis", []),
     toplam=session.get("son_toplam", 0),

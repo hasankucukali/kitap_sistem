@@ -24,12 +24,11 @@
 <h4 style="color:green;">{{ mesaj }}</h4>
 {% endif %}
 
-<form method="post">
+<form method="post" onsubmit="setTimeout(()=>this.reset(),100)">
     <input name="barkod"
            class="form-control"
            placeholder="Barkod okut"
-           autofocus
-           oninput="this.form.submit()">
+           autofocus>
 </form>
 
     <div class="mt-2">

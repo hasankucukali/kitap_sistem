@@ -249,7 +249,7 @@ def satis():
 
 # ➕ ➖ ❌
 @app.route("/sepet_arttir/<barkod>")
-def arttir(barkod):
+def sepet_arttir(barkod):
     if "sepet" in session:
         for i in session["sepet"]:
             if i["barkod"] == barkod:
@@ -259,7 +259,7 @@ def arttir(barkod):
 
 
 @app.route("/sepet_azalt/<barkod>")
-def azalt(barkod):
+def sepet_azalt(barkod):
     if "sepet" in session:
         for i in session["sepet"]:
             if i["barkod"] == barkod:
@@ -270,12 +270,11 @@ def azalt(barkod):
 
 
 @app.route("/sepet_sil/<barkod>")
-def sil(barkod):
+def sepet_sil(barkod):
     if "sepet" in session:
         session["sepet"] = [i for i in session["sepet"] if i["barkod"] != barkod]
     session.modified = True
     return redirect("/satis")
-
 
 @app.route("/tamamla", methods=["POST"])
 def tamamla():

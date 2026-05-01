@@ -350,16 +350,16 @@ def tamamla():
     session["sepet"] = []
     session.modified = True
 
-    return redirect("/fis_sor")  ✅
+    return redirect("/fis_sor")  
 @app.route("/fis_sor")
 def fis_sor():
-    session["mesaj"] = "Satış tamamlandı ✅"
+    session["mesaj"] = "Satış tamamlandı "
     return render_template("fis_sor.html")
 
 from datetime import datetime
 @app.route("/fis_hayir")
 def fis_hayir():
-    session["mesaj"] = "Satış tamamlandı ✅"
+    session["mesaj"] = "Satış tamamlandı "
     return redirect("/satis")
 
 @app.route("/fis_yazdir")

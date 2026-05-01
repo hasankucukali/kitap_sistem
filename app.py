@@ -319,48 +319,38 @@ def sepet_sil(barkod):
 
 @app.route("/tamamla", methods=["POST"])
 def tamamla():
-
-    odeme = request.form.get("odeme", "nakit")
-    session["son_odeme"] = odeme
-    
     if "sepet" not in session or len(session["sepet"]) == 0:
         return redirect("/satis")
 
     con = get_db()
     cur = con.cursor()
 
-toplam = 0
+    toplam = 0
 
-for i in session["sepet"]:
+    for i in session["sepet"]:
+        cur.execute(
+            "UPDATE kitaplar SET stok = stok - %s WHERE barkod=%s AND stok >= %s",
+            (i["adet"], i["barkod"], i["adet"])
+        )
+        toplam += i["adet"] * i["fiyat"]
+
+    # 💰 satış kaydet
     cur.execute(
-        "UPDATE kitaplar SET stok = stok - %s WHERE barkod=%s AND stok >= %s",
-        (i["adet"], i["barkod"], i["adet"])
+        "INSERT INTO satislar (toplam, odeme) VALUES (%s, %s)",
+        (toplam, session.get("son_odeme", "nakit"))
     )
-    toplam += i["adet"] * i["fiyat"]
 
-# 💰 SATIŞI KAYDET (DIŞARIDA!)
-cur.execute(
-    "INSERT INTO satislar (toplam, odeme) VALUES (%s, %s)",
-    (toplam, session.get("son_odeme", "nakit"))
-)
+    con.commit()
+    cur.close()
+    con.close()
 
-con.commit()
-cur.close()
-con.close()
+    session["son_satis"] = list(session["sepet"])
+    session["son_toplam"] = toplam
 
-# 🔥 fiş verisi
-session["son_satis"] = list(session["sepet"])
-session["son_toplam"] = toplam
+    session["sepet"] = []
+    session.modified = True
 
-odeme = request.args.get("odeme", "nakit")
-session["son_odeme"] = odeme
-
-# 🔥 sepet temizle
-session["sepet"] = []
-session.modified = True
-
-return redirect("/fis_sor")
-
+    return redirect("/fis_sor")  ✅
 @app.route("/fis_sor")
 def fis_sor():
     session["mesaj"] = "Satış tamamlandı ✅"

@@ -57,7 +57,7 @@ def fis():
         sepet=sepet_kopya,
         toplam=toplam,
         tarih=datetime.now(),
-        mesaj="Satış tamamlandı ✅"
+        mesaj="Satış tamamlandı "
     )
 # 🚪 LOGOUT
 

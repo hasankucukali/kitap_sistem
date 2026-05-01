@@ -331,21 +331,22 @@ def tamamla():
 
     toplam = 0
 
-    for i in session["sepet"]:
-        cur.execute(
-            "UPDATE kitaplar SET stok = stok - %s WHERE barkod=%s AND stok >= %s",
-            (i["adet"], i["barkod"], i["adet"])
-        )
-        toplam += i["adet"] * i["fiyat"]
-        # 💰 SATIŞI KAYDET
+for i in session["sepet"]:
+    cur.execute(
+        "UPDATE kitaplar SET stok = stok - %s WHERE barkod=%s AND stok >= %s",
+        (i["adet"], i["barkod"], i["adet"])
+    )
+    toplam += i["adet"] * i["fiyat"]
+
+# 💰 SATIŞI KAYDET
 cur.execute(
     "INSERT INTO satislar (toplam, odeme) VALUES (%s, %s)",
     (toplam, session.get("son_odeme", "nakit"))
 )
 
-    con.commit()
-    cur.close()
-    con.close()
+con.commit()
+cur.close()
+con.close()
 
     # 🔥 fiş için veriyi sakla
     session["son_satis"] = list(session["sepet"])

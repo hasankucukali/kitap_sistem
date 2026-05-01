@@ -329,7 +329,7 @@ def tamamla():
     con = get_db()
     cur = con.cursor()
 
-    toplam = 0
+toplam = 0
 
 for i in session["sepet"]:
     cur.execute(
@@ -338,7 +338,7 @@ for i in session["sepet"]:
     )
     toplam += i["adet"] * i["fiyat"]
 
-# 💰 SATIŞI KAYDET
+# 💰 SATIŞI KAYDET (DIŞARIDA!)
 cur.execute(
     "INSERT INTO satislar (toplam, odeme) VALUES (%s, %s)",
     (toplam, session.get("son_odeme", "nakit"))
@@ -348,18 +348,18 @@ con.commit()
 cur.close()
 con.close()
 
-    # 🔥 fiş için veriyi sakla
-    session["son_satis"] = list(session["sepet"])
-    session["son_toplam"] = toplam
+# 🔥 fiş verisi
+session["son_satis"] = list(session["sepet"])
+session["son_toplam"] = toplam
 
-    odeme = request.args.get("odeme", "nakit")
-    session["son_odeme"] = odeme
+odeme = request.args.get("odeme", "nakit")
+session["son_odeme"] = odeme
 
-    # 🔥 sepeti temizle
-    session["sepet"] = []
-    session.modified = True
+# 🔥 sepet temizle
+session["sepet"] = []
+session.modified = True
 
-    return redirect("/fis_sor")
+return redirect("/fis_sor")
 
 @app.route("/fis_sor")
 def fis_sor():

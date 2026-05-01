@@ -337,6 +337,11 @@ def tamamla():
             (i["adet"], i["barkod"], i["adet"])
         )
         toplam += i["adet"] * i["fiyat"]
+        # 💰 SATIŞI KAYDET
+cur.execute(
+    "INSERT INTO satislar (toplam, odeme) VALUES (%s, %s)",
+    (toplam, session.get("son_odeme", "nakit"))
+)
 
     con.commit()
     cur.close()
@@ -375,24 +380,22 @@ def fis_yazdir():
     tarih=datetime.now(),
     odeme=session.get("son_odeme", "nakit")
 )
-@app.route("/kur")
-def kur():
+
+@app.route("/ciro")
+def ciro():
     con = get_db()
     cur = con.cursor()
 
-    cur.execute("""
-    CREATE TABLE IF NOT EXISTS satislar (
-        id SERIAL PRIMARY KEY,
-        toplam FLOAT,
-        odeme VARCHAR(20),
-        tarih TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    )
-    """)
+    cur.execute("SELECT SUM(toplam) FROM satislar")
+    toplam = cur.fetchone()[0] or 0
 
-    con.commit()
+    cur.execute("SELECT toplam, odeme, tarih FROM satislar ORDER BY tarih DESC")
+    satislar = cur.fetchall()
+
     cur.close()
     con.close()
 
-    return "TABLO OLUŞTU"
+    return render_template("ciro.html", toplam=toplam, satislar=satislar)
+
 if __name__== "__main__":
     app.run(debug=True)

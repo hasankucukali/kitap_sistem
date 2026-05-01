@@ -375,6 +375,24 @@ def fis_yazdir():
     tarih=datetime.now(),
     odeme=session.get("son_odeme", "nakit")
 )
+@app.route("/kur")
+def kur():
+    con = get_db()
+    cur = con.cursor()
 
+    cur.execute("""
+    CREATE TABLE IF NOT EXISTS satislar (
+        id SERIAL PRIMARY KEY,
+        toplam FLOAT,
+        odeme VARCHAR(20),
+        tarih TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+    """)
+
+    con.commit()
+    cur.close()
+    con.close()
+
+    return "TABLO OLUŞTU"
 if __name__== "__main__":
     app.run(debug=True)
